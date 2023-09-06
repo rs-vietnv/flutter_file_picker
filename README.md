@@ -6,6 +6,9 @@
  <a href="https://github.com/Solido/awesome-flutter">
     <img alt="Awesome Flutter" src="https://img.shields.io/badge/Awesome-Flutter-blue.svg?longCache=true&style=flat-square">
   </a>
+ <a href="https://codemagic.io/apps/5ce89f4a9b46f5000ca89638/5ce89f4a9b46f5000ca89637/latest_build">
+    <img alt="Build Status" src="https://api.codemagic.io/apps/5ee2d379c2d4737a756cbd00/5ee2d379c2d4737a756cbcff/status_badge.svg">
+  </a>
  <a href="https://www.buymeacoffee.com/gQyz2MR">
     <img alt="Buy me a coffee" src="https://img.shields.io/badge/Donate-Buy%20Me%20A%20Coffee-yellow.svg">
   </a>
@@ -32,18 +35,6 @@ A package that allows you to use the native file explorer to pick single or mult
 * Open a save-file / save-as dialog (a dialog that lets the user specify the drive, directory, and name of a file to save)
 
 If you have any feature that you want to see in this package, please feel free to issue a suggestion. 🎉
-
-## Compatibility Chart
-
-| API                   | Android            | iOS                | Linux              | macOS              | Windows            | Web                |
-| --------------------- | ------------------ | ------------------ | ------------------ | ------------------ | ------------------ | ------------------ |
-| clearTemporaryFiles() | :heavy_check_mark: | :heavy_check_mark: | :x:                | :x:                | :x:                | :x:                |
-| getDirectoryPath()    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x:                |
-| pickFiles()           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| saveFile()            | :x:                | :x:                | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x:                |
-
-See the [API section of the File Picker Wiki](https://github.com/miguelpruivo/flutter_file_picker/wiki/api) or the [official API reference on pub.dev](https://pub.dev/documentation/file_picker/latest/file_picker/FilePicker-class.html) for further details.
-
 
 ## Documentation
 See the **[File Picker Wiki](https://github.com/miguelpruivo/flutter_file_picker/wiki)** for every detail on about how to install, setup and use it.
@@ -145,19 +136,15 @@ For full usage details refer to the **[Wiki](https://github.com/miguelpruivo/flu
 
 ## Example App
 #### Android
-![DemoAndroid](https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/screenshots/example_android.gif)
-
+![Demo](https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/screenshots/example.gif)
 #### iOS
 ![DemoMultiFilters](https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/screenshots/example_ios.gif)
-
 #### MacOS
 ![DemoMacOS](https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/screenshots/example_macos.png)
-
 #### Linux
-![DemoLinux](https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/screenshots/example_linux.gif)
-
+![DemoLinux](https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/screenshots/example_linux.png)
 #### Windows
-![DemoWindows](https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/screenshots/example_windows.gif)
+![DemoWindows](https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/screenshots/example_windows.png)
 
 ## Getting Started
 
@@ -165,3 +152,6 @@ For help getting started with Flutter, view our online
 [documentation](https://flutter.io/).
 
 For help on editing plugin code, view the [documentation](https://flutter.io/platform-plugins/#edit-code).
+
+
+

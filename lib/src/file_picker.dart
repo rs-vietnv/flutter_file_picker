@@ -9,7 +9,7 @@ import 'package:file_picker/src/windows/stub.dart'
     if (dart.library.io) 'package:file_picker/src/windows/file_picker_windows.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-const String defaultDialogTitle = '';
+const String defaultDialogTitle = 'File Picker';
 
 enum FileType {
   any,
@@ -37,7 +37,7 @@ abstract class FilePicker extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static FilePicker _instance = FilePicker._setPlatform();
+  static late FilePicker _instance = FilePicker._setPlatform();
 
   static FilePicker get platform => _instance;
 
@@ -136,14 +136,10 @@ abstract class FilePicker extends PlatformInterface {
   /// window). This parameter works only on Windows desktop.
   ///
   /// [initialDirectory] can be optionally set to an absolute path to specify
-  /// where the dialog should open. Only supported on Linux and macOS.
+  /// where the dialog should open. Only supported on Linux, macOS, and Windows.
   ///
-  /// Returns a [Future<String?>] which resolves to  the absolute path of the selected directory,
-  /// if the user selected a directory. Returns `null` if the user aborted the dialog or if the
-  /// folder path couldn't be resolved.
+  /// Returns `null` if aborted or if the folder path couldn't be resolved.
   ///
-  /// Note: on Windows, throws a `WindowsException` with a detailed error message, if the dialog
-  /// could not be instantiated or the dialog result could not be interpreted.
   /// Note: Some Android paths are protected, hence can't be accessed and will return `/` instead.
   Future<String?> getDirectoryPath({
     String? dialogTitle,

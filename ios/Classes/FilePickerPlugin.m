@@ -2,22 +2,14 @@
 #import "FileUtils.h"
 #import "ImageUtils.h"
 
-#ifdef PICKER_MEDIA
 @import DKImagePickerController;
 
 @interface FilePickerPlugin() <DKImageAssetExporterObserver>
-#else
-@interface FilePickerPlugin()
-#endif
 @property (nonatomic) FlutterResult result;
 @property (nonatomic) FlutterEventSink eventSink;
-#ifdef PICKER_MEDIA
 @property (nonatomic) UIImagePickerController *galleryPickerController;
-#endif
-#ifdef PICKER_DOCUMENT
 @property (nonatomic) UIDocumentPickerViewController *documentPickerController;
 @property (nonatomic) UIDocumentInteractionController *interactionController;
-#endif
 @property (nonatomic) MPMediaPickerController *audioPickerController;
 @property (nonatomic) NSArray<NSString *> * allowedExtensions;
 @property (nonatomic) BOOL loadDataToMemory;
@@ -95,13 +87,7 @@
     
     if([call.method isEqualToString:@"dir"]) {
         if (@available(iOS 13, *)) {
-#ifdef PICKER_DOCUMENT
             [self resolvePickDocumentWithMultiPick:NO pickDirectory:YES];
-#else
-            _result([FlutterError errorWithCode:@"Unsupported picker type"
-                                        message:@"Support for the Document picker is not compiled in. Remove the Pod::PICKER_DOCUMENT=false statement from your Podfile."
-                                        details:nil]);
-#endif
         } else {
             _result([self getDocumentDirectory]);
             _result = nil;
@@ -123,30 +109,12 @@
                                         details:nil]);
             _result = nil;
         } else if(self.allowedExtensions != nil) {
-#ifdef PICKER_DOCUMENT
             [self resolvePickDocumentWithMultiPick:isMultiplePick pickDirectory:NO];
-#else
-            _result([FlutterError errorWithCode:@"Unsupported picker type"
-                                        message:@"Support for the Document picker is not compiled in. Remove the Pod::PICKER_DOCUMENT=false statement from your Podfile."
-                                        details:nil]);
-#endif
         }
     } else if([call.method isEqualToString:@"video"] || [call.method isEqualToString:@"image"] || [call.method isEqualToString:@"media"]) {
-#ifdef PICKER_MEDIA
         [self resolvePickMedia:[FileUtils resolveMediaType:call.method] withMultiPick:isMultiplePick withCompressionAllowed:self.allowCompression];
-#else
-        _result([FlutterError errorWithCode:@"Unsupported picker type"
-                                    message:@"Support for the Media picker is not compiled in. Remove the Pod::PICKER_MEDIA=false statement from your Podfile."
-                                    details:nil]);
-#endif
     } else if([call.method isEqualToString:@"audio"]) {
- #ifdef PICKER_AUDIO
-       [self resolvePickAudioWithMultiPick: isMultiplePick];
- #else
-        _result([FlutterError errorWithCode:@"Unsupported picker type"
-                                    message:@"Support for the Audio picker is not compiled in. Remove the Pod::PICKER_AUDIO=false statement from your Podfile."
-                                    details:nil]);
-#endif      
+        [self resolvePickAudioWithMultiPick: isMultiplePick];
     } else {
         result(FlutterMethodNotImplemented);
         _result = nil;
@@ -159,8 +127,6 @@
 }
 
 #pragma mark - Resolvers
-
-#ifdef PICKER_DOCUMENT
 - (void)resolvePickDocumentWithMultiPick:(BOOL)allowsMultipleSelection pickDirectory:(BOOL)isDirectory {
     
     @try{
@@ -184,9 +150,7 @@
     
     [[self viewControllerWithWindow:nil] presentViewController:self.documentPickerController animated:YES completion:nil];
 }
-#endif // PICKER_DOCUMENT
 
-#ifdef PICKER_MEDIA
 - (void) resolvePickMedia:(MediaType)type withMultiPick:(BOOL)multiPick withCompressionAllowed:(BOOL)allowCompression  {
     
 #ifdef PHPicker
@@ -321,9 +285,7 @@
     
     [[self viewControllerWithWindow:nil] presentViewController:dkImagePickerController animated:YES completion:nil];
 }
-#endif // PICKER_MEDIA
 
-#ifdef PICKER_AUDIO
 - (void) resolvePickAudioWithMultiPick:(BOOL)isMultiPick {
     
     
@@ -342,8 +304,6 @@
     
     [[self viewControllerWithWindow:nil] presentViewController:self.audioPickerController animated:YES completion:nil];
 }
-#endif // PICKER_AUDIO
-
 
 - (void) handleResult:(id) files {
     _result([FileUtils resolveFileInfo: [files isKindOfClass: [NSArray class]] ? files : @[files] withData:self.loadDataToMemory]);
@@ -352,7 +312,6 @@
 
 #pragma mark - Delegates
 
-#ifdef PICKER_DOCUMENT
 // DocumentPicker delegate - iOS 10 only
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentAtURL:(NSURL *)url{
     [self.documentPickerController dismissViewControllerAnimated:YES completion:nil];
@@ -366,42 +325,19 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls{
     if(_result == nil) {
         return;
     }
-    NSMutableArray<NSURL *> *newUrls = [NSMutableArray new];
-    for (NSURL *url in urls) {
-        // Create file URL to temporary folder
-        NSURL *tempURL = [NSURL fileURLWithPath:NSTemporaryDirectory()];
-        // Append filename (name+extension) to URL
-        tempURL = [tempURL URLByAppendingPathComponent:url.lastPathComponent];
-        NSError *error;
-        // If file with same name exists remove it (replace file with new one)
-        if ([[NSFileManager defaultManager] fileExistsAtPath:tempURL.path]) {
-            [[NSFileManager defaultManager] removeItemAtPath:tempURL.path error:&error];
-            if (error) {
-                NSLog(@"%@", error.localizedDescription);
-            }
-        }
-        // Move file from app_id-Inbox to tmp/filename
-        [[NSFileManager defaultManager] moveItemAtPath:url.path toPath:tempURL.path error:&error];
-        if (error) {
-            NSLog(@"%@", error.localizedDescription);
-        } else {
-            [newUrls addObject:tempURL];
-        }
-    }
     
     [self.documentPickerController dismissViewControllerAnimated:YES completion:nil];
     
     if(controller.documentPickerMode == UIDocumentPickerModeOpen) {
-        _result([newUrls objectAtIndex:0].path);
+        _result([urls objectAtIndex:0].path);
         _result = nil;
         return;
     }
     
-    [self handleResult: newUrls];
+    [self handleResult: urls];
 }
-#endif // PICKER_DOCUMENT
 
-#ifdef PICKER_MEDIA
+
 // ImagePicker delegate
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     if(_result == nil) {
@@ -473,7 +409,7 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls{
         return;
     }
     
-    NSMutableArray<NSURL *> * urls = [[NSMutableArray alloc] initWithCapacity: results.count];
+    NSMutableArray<NSURL *> * urls = [[NSMutableArray alloc] initWithCapacity:results.count];
     
     self.group = dispatch_group_create();
     
@@ -483,13 +419,8 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls{
     
     __block NSError * blockError;
     
-    for (NSInteger index = 0; index < results.count; ++index) {
-        [urls addObject:[NSNull null]];
-
+    for (PHPickerResult *result in results) {
         dispatch_group_enter(_group);
-
-        PHPickerResult * result = [results objectAtIndex: index];
-
         [result.itemProvider loadFileRepresentationForTypeIdentifier:@"public.item" completionHandler:^(NSURL * _Nullable url, NSError * _Nullable error) {
             
             if(url == nil) {
@@ -499,10 +430,7 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls{
                 return;
             }
             
-            long timestamp = (long)([[NSDate date] timeIntervalSince1970] * 1000);
-            NSString * filenameWithoutExtension = [url.lastPathComponent stringByDeletingPathExtension];
-            NSString * fileExtension = url.pathExtension;
-            NSString * filename = [NSString stringWithFormat:@"%@-%ld.%@", filenameWithoutExtension, timestamp, fileExtension];
+            NSString * filename = url.lastPathComponent;
             NSString * extension = [filename pathExtension];
             NSFileManager * fileManager = [[NSFileManager alloc] init];
             NSURL * cachedUrl;
@@ -512,18 +440,12 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls{
                 NSArray * files = [fileManager contentsOfDirectoryAtURL:url includingPropertiesForKeys:@[] options:NSDirectoryEnumerationSkipsHiddenFiles error:nil];
                 
                 for (NSURL * item in files) {
-                    
                     if (UTTypeConformsTo(UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, CFBridgingRetain([item pathExtension]), NULL), kUTTypeImage)) {
-                        NSData *assetData = [NSData dataWithContentsOfURL:item];
-                        //Convert any type of image to jpeg
-                        NSData *convertedImageData = UIImageJPEGRepresentation([UIImage imageWithData:assetData], 1.0);
-                        //Get meta data from asset
-                        NSDictionary *metaData = [ImageUtils getMetaDataFromImageData:assetData];
-                        //Append meta data into jpeg of live photo
-                        NSData *data = [ImageUtils imageFromImage:convertedImageData withMetaData:metaData];
-                        //Save jpeg
-                        NSString * filenameWithoutExtension = [filename stringByDeletingPathExtension];
-                        NSString * tmpFile = [NSTemporaryDirectory() stringByAppendingPathComponent:[filenameWithoutExtension stringByAppendingString:@".jpeg"]];
+                        
+                        UIImage * img = [UIImage imageWithContentsOfFile:item.path];
+                        NSString * fileName = [[item.path lastPathComponent] stringByDeletingPathExtension];
+                        NSData * data = UIImageJPEGRepresentation(img, 1);
+                        NSString * tmpFile = [NSTemporaryDirectory() stringByAppendingPathComponent:[fileName stringByAppendingString:@".jpeg"]];
                         cachedUrl = [NSURL fileURLWithPath: tmpFile];
 
                         if([fileManager fileExistsAtPath:tmpFile]) {
@@ -559,7 +481,7 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls{
             }
             
             
-            [urls replaceObjectAtIndex:index withObject:cachedUrl];
+            [urls addObject:cachedUrl];
             dispatch_group_leave(self->_group);
         }];
     }
@@ -581,10 +503,9 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls{
     });
 }
 
-#endif // PHPicker
-#endif // PICKER_MEDIA
+#endif
 
-#ifdef PICKER_AUDIO
+
 // AudioPicker delegate
 - (void)mediaPicker: (MPMediaPickerController *)mediaPicker didPickMediaItems:(MPMediaItemCollection *)mediaItemCollection
 {
@@ -615,11 +536,9 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls{
     }
     [self handleResult:urls];
 }
-#endif // PICKER_AUDIO
 
 #pragma mark - Actions canceled
 
-#ifdef PICKER_MEDIA
 - (void)presentationControllerDidDismiss:(UIPresentationController *)controller {
     Log(@"FilePicker canceled");
     if (self.result != nil) {
@@ -627,34 +546,27 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls{
         self.result = nil;
     }
 }
-#endif // PICKER_MEDIA
 
-#ifdef PICKER_AUDIO
 - (void)mediaPickerDidCancel:(MPMediaPickerController *)controller {
     Log(@"FilePicker canceled");
     _result(nil);
     _result = nil;
     [controller dismissViewControllerAnimated:YES completion:NULL];
 }
-#endif // PICKER_AUDIO
 
-#ifdef PICKER_DOCUMENT
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
     Log(@"FilePicker canceled");
     _result(nil);
     _result = nil;
     [controller dismissViewControllerAnimated:YES completion:NULL];
 }
-#endif // PICKER_DOCUMENT
 
-#ifdef PICKER_MEDIA
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
     Log(@"FilePicker canceled");
     _result(nil);
     _result = nil;
     [picker dismissViewControllerAnimated:YES completion:NULL];
 }
-#endif
 
 #pragma mark - Alert dialog
 

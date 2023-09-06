@@ -16,7 +16,7 @@ class QarmaAndZenityHandler implements DialogHandler {
     final arguments = ['--file-selection', '--title', dialogTitle];
 
     if (saveFile) {
-      arguments.addAll(['--save', '--confirm-overwrite']);
+      arguments.add('--save');
     }
 
     if (fileName.isNotEmpty && initialDirectory.isNotEmpty) {
@@ -50,7 +50,7 @@ class QarmaAndZenityHandler implements DialogHandler {
       case FileType.audio:
         return '*.aac *.midi *.mp3 *.ogg *.wav';
       case FileType.custom:
-        return '*.${allowedExtensions!.join(' *.')}';
+        return '*.' + allowedExtensions!.join(' *.');
       case FileType.image:
         return '*.bmp *.gif *.jpeg *.jpg *.png';
       case FileType.media:
@@ -69,7 +69,7 @@ class QarmaAndZenityHandler implements DialogHandler {
     }
     return fileSelectionResult
         .split('|/')
-        .map((String path) => path.startsWith('/') ? path : '/$path')
+        .map((String path) => path.startsWith('/') ? path : '/' + path)
         .toList();
   }
 }

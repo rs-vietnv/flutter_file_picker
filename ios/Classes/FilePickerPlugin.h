@@ -4,23 +4,14 @@
 #import <Photos/Photos.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 
-#if PICKER_MEDIA && (__has_include(<PhotosUI/PHPicker.h>) || __has_include("PHPicker.h"))
+#if __has_include(<PhotosUI/PHPicker.h>) || __has_include("PHPicker.h")
 #define PHPicker
 #import <PhotosUI/PHPicker.h>
 #endif
 
-@interface FilePickerPlugin : NSObject<FlutterPlugin, FlutterStreamHandler, UITabBarDelegate, UINavigationControllerDelegate, UIAdaptivePresentationControllerDelegate
-#ifdef PICKER_MEDIA
-    , UIImagePickerControllerDelegate
+@interface FilePickerPlugin : NSObject<FlutterPlugin, FlutterStreamHandler, UIAdaptivePresentationControllerDelegate, UIDocumentPickerDelegate, UITabBarDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, MPMediaPickerControllerDelegate
 #ifdef PHPicker
-    , PHPickerViewControllerDelegate
+, PHPickerViewControllerDelegate
 #endif
-#endif // PICKER_MEDIA
-#ifdef PICKER_DOCUMENT
-    , UIDocumentPickerDelegate
-#endif // PICKER_DOCUMENT
-#ifdef PICKER_AUDIO
-    , MPMediaPickerControllerDelegate
-#endif // PICKER_AUDIO
 >
 @end
